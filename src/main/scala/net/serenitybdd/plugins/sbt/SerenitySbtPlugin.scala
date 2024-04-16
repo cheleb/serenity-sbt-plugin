@@ -62,7 +62,8 @@ object SerenitySbtPlugin extends AutoPlugin with SerenityPluginExtension {
         "project.build.directory",
         baseDirectory.value.getAbsolutePath
       )
-      println("cleaning serenity report history.")
+      streams.value.log.info("cleaning serenity report history.")
+      println("cleaning ^ serenity report history.")
       clearHistoryFiles()
     },
     historyReports := {
