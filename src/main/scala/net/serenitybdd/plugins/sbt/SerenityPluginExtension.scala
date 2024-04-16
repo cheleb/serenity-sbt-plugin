@@ -7,28 +7,20 @@ import java.util.stream.Collectors
 import java.util.{Optional, Locale}
 
 import net.serenitybdd.core.Serenity
-import net.serenitybdd.core.history.FileSystemTestOutcomeSummaryRecorder
-import net.thucydides.core.ThucydidesSystemProperty
-import net.thucydides.core.configuration.SystemPropertiesConfiguration
-import net.thucydides.core.guice.Injectors
-import net.thucydides.core.reports.UserStoryTestReporter
 import net.thucydides.core.reports.html.HtmlAggregateStoryReporter
-import net.thucydides.core.util.EnvironmentVariables
-import net.thucydides.core.webdriver.Configuration
 import org.apache.commons.io.FileUtils
+import net.thucydides.model.util.EnvironmentVariables
+import net.thucydides.model.configuration.SystemPropertiesConfiguration
+import net.thucydides.model.ThucydidesSystemProperty
+import net.serenitybdd.model.di.DependencyInjector
+import net.serenitybdd.core.di.SerenityInfrastructure
+import net.thucydides.model.reports.UserStoryTestReporter
+import net.serenitybdd.model.history.FileSystemTestOutcomeSummaryRecorder
 
 trait SerenityPluginExtension {
-  def environmentVariables =
-    Injectors.getInjector.getProvider(classOf[EnvironmentVariables]).get
-  def systemPropertiesConfiguration = Injectors.getInjector
-    .getProvider(classOf[SystemPropertiesConfiguration])
-    .get
+  def environmentVariables = SerenityInfrastructure.getEnvironmentVariables()
 
-  lazy val configuration =
-    Injectors
-      .getInjector()
-      .getProvider(classOf[Configuration[Configuration[_]]])
-      .get()
+  lazy val configuration = SerenityInfrastructure.getConfiguration()
   lazy val outputDirectory = configuration.getOutputDirectory()
   lazy val historyDirectory = configuration.getHistoryDirectory()
   lazy val sourceDirectory = outputDirectory
@@ -62,7 +54,8 @@ trait SerenityPluginExtension {
       requirementBaseDir,
       environmentVariables.getProperty("user.dir")
     )
-    systemPropertiesConfiguration.reloadOutputDirectory()
+    // systemPropertiesConfiguration.reloadOutputDirectory()
+
   }
 
   private def updateSystemProperty(
