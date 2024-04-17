@@ -1,16 +1,17 @@
 package com.tysafe.sbt.serenity
 
-import net.serenitybdd.plugins.sbt.SerenityPluginExtension
 import sbt.Keys._
 import sbt.Tests.Cleanup
 import sbt._
 import plugins._
+import dev.cheleb.sbtserenity.tasks.SerenityTasks
 
-object SerenitySbtPlugin extends AutoPlugin with SerenityPluginExtension {
+object SerenitySbtPlugin extends AutoPlugin {
 
-  override def projectKey = Def.setting(name.value).toString
+  def projectKey = Def.setting(name.value).toString
 
   object autoImport {
+    val serenityTasks = taskKey[SerenityTasks]("Serenity sbt tasks")
     val serenityReportTask = taskKey[Unit]("Serenity sbt report task")
     val clearReports =
       taskKey[Unit]("Serenity sbt task to delete report directory")
@@ -25,6 +26,11 @@ object SerenitySbtPlugin extends AutoPlugin with SerenityPluginExtension {
   override def requires: AutoPlugin = JvmPlugin
 
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
+    serenityTasks := new SerenityTasks(
+      projectKey,
+      streams.value.log,
+      baseDirectory.value
+    ),
     test := {
       serenityReportTask.dependsOn((Test / test).result).value
     },
@@ -49,39 +55,10 @@ object SerenitySbtPlugin extends AutoPlugin with SerenityPluginExtension {
     clean := {
       clearReports.dependsOn((clean).result).value
     },
-    clearReports := {
-      System.setProperty(
-        "project.build.directory",
-        baseDirectory.value.getAbsolutePath
-      )
-      println("cleaning serenity report directory.")
-      clearReportFiles()
-    },
-    clearHistory := {
-      System.setProperty(
-        "project.build.directory",
-        baseDirectory.value.getAbsolutePath
-      )
-      streams.value.log.info("cleaning serenity report history.")
-      println("cleaning ^ serenity report history.")
-      clearHistoryFiles()
-    },
-    historyReports := {
-      System.setProperty(
-        "project.build.directory",
-        baseDirectory.value.getAbsolutePath
-      )
-      println("generating Serenity report history.")
-      generateHistory()
-    },
-    serenityReportTask := {
-      System.setProperty(
-        "project.build.directory",
-        baseDirectory.value.getAbsolutePath
-      )
-      println("generating Serenity report.")
-      execute()
-    }
+    clearReports := serenityTasks.value.clearReports,
+    clearHistory := serenityTasks.value.clearHistory,
+    historyReports := serenityTasks.value.historyReports,
+    serenityReportTask := serenityTasks.value.serenityReport
   )
 
 }

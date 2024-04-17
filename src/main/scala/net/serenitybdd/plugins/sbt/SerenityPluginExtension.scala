@@ -17,7 +17,7 @@ import net.serenitybdd.core.di.SerenityInfrastructure
 import net.thucydides.model.reports.UserStoryTestReporter
 import net.serenitybdd.model.history.FileSystemTestOutcomeSummaryRecorder
 
-trait SerenityPluginExtension {
+class SerenityCapabilities(projectKey: String) {
   def environmentVariables = SerenityInfrastructure.getEnvironmentVariables()
 
   lazy val configuration = SerenityInfrastructure.getConfiguration()
@@ -39,8 +39,6 @@ trait SerenityPluginExtension {
     ThucydidesSystemProperty.SERENITY_TEST_REQUIREMENTS_BASEDIR.getPropertyName
   )
   lazy val generateOutcomes: Boolean = true
-
-  def projectKey = Serenity.getDefaultProjectKey
 
   def configureEnvironmentVariables() = {
     Locale.setDefault(Locale.ENGLISH)
